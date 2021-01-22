@@ -9,6 +9,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
@@ -50,6 +51,15 @@ public class CheeseRackTileEntity extends TileEntity implements ITickableTileEnt
         };
     }
 
+    public NonNullList<ItemStack> getAllItems() {
+        NonNullList<ItemStack> items = NonNullList.create();
+        for(int i = 0; i < itemHandler.getSlots(); i++) {
+            ItemStack stack = itemHandler.getStackInSlot(i);
+            items.add(stack);
+        }
+        return items;
+    }
+
     private int timerMax = 1200; //60 seconds
     private int timer = timerMax;
 
@@ -72,7 +82,7 @@ public class CheeseRackTileEntity extends TileEntity implements ITickableTileEnt
 
         if(timer <= 0) {
             timer = timerMax;
-            CheesemakingMod.LOGGER.debug(getEnvironmentType());
+            //CheesemakingMod.LOGGER.debug(getEnvironmentType());
             Cheese.EnvironmentType envType = getEnvironmentType();
             for(int i = 0; i < 8; i++) {
                 if(itemHandler.getStackInSlot(i).getItem() instanceof Cheese) {

@@ -5,7 +5,7 @@
     loaderVersion="[35,)"
     license="GNU GPLv3"
     # A URL to refer people to when problems occur with this mod
-    issueTrackerURL="http://github.com/MinecraftForge/MinecraftForge/issues"
+    issueTrackerURL="https://github.com/ghana7/Cheesemaking/issues"
     # If the mods defined in this file should show as seperate resource packs
     showAsResourcePack=false
 
@@ -13,14 +13,12 @@
       modId="cheesemaking"
       version="1.0"
       displayName="Cheesemaking"
-      updateJSONURL="http://minecraftforge.net/versions.json"
-      displayURL="http://minecraftforge.net"
+      updateJSONURL="https://minecraftforge.net/versions.json"
+      displayURL="https://github.com/ghana7/Cheesemaking"
       logoFile="largelogo.png"
       credits=""
       authors="ghana7"
-      description='''
-      Lets you make different types of cheese
-      '''
+      description="Lets you make different types of cheese!"
 
       [[dependencies.cheesemaking]]
         modId="forge"

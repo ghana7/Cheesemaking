@@ -9,6 +9,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -31,8 +32,8 @@ public class CurdingTub extends Block {
 
     public CurdingTub() {
         super(Properties.create(Material.WOOD)
-        .harvestTool(ToolType.AXE)
         .sound(SoundType.WOOD)
+        .hardnessAndResistance(2.0F)
         .notSolid().setOpaque((BlockState p_test_1_, IBlockReader p_test_2_, BlockPos p_test_3_) -> (false)));
     }
 
@@ -58,7 +59,7 @@ public class CurdingTub extends Block {
         if(worldIn.isRemote) {
             return ActionResultType.SUCCESS;
         } else {
-            CheesemakingMod.LOGGER.debug(handIn);
+            //CheesemakingMod.LOGGER.debug(handIn);
             ItemStack stack = player.getHeldItem(handIn);
             CurdingTubTileEntity curdingTubTileEntity = (CurdingTubTileEntity) worldIn.getTileEntity(pos);
             if(stack.getItem() instanceof MilkBucketItem) {
@@ -76,7 +77,11 @@ public class CurdingTub extends Block {
                 }
                 return ActionResultType.SUCCESS;
             } else if(stack.getItem() instanceof Rennet) {
-                curdingTubTileEntity.itemHandler.insertItem(0, stack, false);
+                ItemStack newStack = curdingTubTileEntity.itemHandler.insertItem(0, stack, false);
+                if(!player.isCreative()) {
+                    player.setHeldItem(handIn, newStack);
+                }
+
                 return ActionResultType.SUCCESS;
             } else if(!curdingTubTileEntity.itemHandler.getStackInSlot(1).isEmpty() && (stack.isEmpty() || stack.getItem() instanceof Curd)) {
                 if(stack.isEmpty()) {
@@ -85,8 +90,24 @@ public class CurdingTub extends Block {
                     player.getHeldItem(handIn).grow(curdingTubTileEntity.itemHandler.extractItem(1, 4, false).getCount());
                 }
                 return ActionResultType.SUCCESS;
+            } else if(!curdingTubTileEntity.itemHandler.getStackInSlot(0).isEmpty() && (stack.isEmpty() || stack.getItem() instanceof Rennet)) {
+                if(stack.isEmpty()) {
+                    player.setHeldItem(handIn, curdingTubTileEntity.itemHandler.extractItem(0, 4, false));
+                } else {
+                    player.getHeldItem(handIn).grow(curdingTubTileEntity.itemHandler.extractItem(0, 4, false).getCount());
+                }
+                return ActionResultType.SUCCESS;
             }
             return ActionResultType.PASS;
+        }
+    }
+
+    @Override
+    public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
+        super.onBlockHarvested(worldIn, pos, state, player);
+        TileEntity tileEntity = worldIn.getTileEntity(pos);
+        if(tileEntity instanceof CurdingTubTileEntity) {
+            InventoryHelper.dropItems(worldIn, pos, ((CurdingTubTileEntity)tileEntity).getAllItems());
         }
     }
 }

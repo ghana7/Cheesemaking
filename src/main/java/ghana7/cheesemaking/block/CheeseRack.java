@@ -3,11 +3,14 @@ package ghana7.cheesemaking.block;
 import ghana7.cheesemaking.CheesemakingMod;
 import ghana7.cheesemaking.item.Cheese;
 import ghana7.cheesemaking.tileentity.CheeseRackTileEntity;
+import ghana7.cheesemaking.tileentity.CurdingTubTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialColor;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
@@ -24,8 +27,8 @@ import javax.annotation.Nullable;
 public class CheeseRack extends Block {
     public CheeseRack() {
         super(Properties.create(Material.WOOD)
-                .harvestTool(ToolType.AXE)
                 .sound(SoundType.WOOD)
+                .hardnessAndResistance(2.0F)
                 .notSolid().setOpaque((BlockState p_test_1_, IBlockReader p_test_2_, BlockPos p_test_3_) -> (false)));
     }
 
@@ -56,7 +59,7 @@ public class CheeseRack extends Block {
             ItemStack stack = player.getHeldItem(handIn);
             CheeseRackTileEntity cheeseRackTileEntity = (CheeseRackTileEntity) worldIn.getTileEntity(pos);
             Vector3d hitPos = hit.getHitVec().subtract(pos.getX(), pos.getY(), pos.getZ());
-            CheesemakingMod.LOGGER.debug(hitPos);
+            //CheesemakingMod.LOGGER.debug(hitPos);
             int hitIndex = 0;
             if(hitPos.x > 0.5) {
                 hitIndex += 1;
@@ -67,10 +70,13 @@ public class CheeseRack extends Block {
             if(hitPos.z > 0.5) {
                 hitIndex += 2;
             }
-            CheesemakingMod.LOGGER.debug(hitIndex);
+            //CheesemakingMod.LOGGER.debug(hitIndex);
             if(cheeseRackTileEntity.itemHandler.getStackInSlot(hitIndex).isEmpty() && stack.getItem() instanceof Cheese) {
+                ItemStack newStack = cheeseRackTileEntity.itemHandler.insertItem(hitIndex, stack, false);
+                if(!player.isCreative()) {
 
-                player.setHeldItem(handIn, cheeseRackTileEntity.itemHandler.insertItem(hitIndex, stack, false));
+                    player.setHeldItem(handIn, newStack);
+                }
                 return ActionResultType.SUCCESS;
             } else if(!cheeseRackTileEntity.itemHandler.getStackInSlot(hitIndex).isEmpty() && (stack.isEmpty() || stack.getItem().equals(cheeseRackTileEntity.itemHandler.getStackInSlot(hitIndex).getItem()))) {
 
@@ -82,6 +88,15 @@ public class CheeseRack extends Block {
                 return ActionResultType.SUCCESS;
             }
             return ActionResultType.PASS;
+        }
+    }
+
+    @Override
+    public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
+        super.onBlockHarvested(worldIn, pos, state, player);
+        TileEntity tileEntity = worldIn.getTileEntity(pos);
+        if(tileEntity instanceof CheeseRackTileEntity) {
+            InventoryHelper.dropItems(worldIn, pos, ((CheeseRackTileEntity)tileEntity).getAllItems());
         }
     }
 }

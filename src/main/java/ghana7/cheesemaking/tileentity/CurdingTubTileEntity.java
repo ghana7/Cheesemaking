@@ -10,6 +10,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
@@ -53,6 +54,15 @@ public class CurdingTubTileEntity extends TileEntity implements ITickableTileEnt
                 return super.extractItem(slot, amount, simulate);
             }
         };
+    }
+
+    public NonNullList<ItemStack> getAllItems() {
+        NonNullList<ItemStack> items = NonNullList.create();
+        for(int i = 0; i < itemHandler.getSlots(); i++) {
+            ItemStack stack = itemHandler.getStackInSlot(i);
+            items.add(stack);
+        }
+        return items;
     }
 
     private int timerMax = 60; //3 seconds
@@ -130,7 +140,7 @@ public class CurdingTubTileEntity extends TileEntity implements ITickableTileEnt
     public boolean addMilk(int amount) {
         if(currentMilkAmount + amount <= milkCapacity) {
             currentMilkAmount += amount;
-            CheesemakingMod.LOGGER.debug(currentMilkAmount);
+            //CheesemakingMod.LOGGER.debug(currentMilkAmount);
             markDirty();
             world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), 2);
             return true;
@@ -141,7 +151,7 @@ public class CurdingTubTileEntity extends TileEntity implements ITickableTileEnt
     public boolean removeMilk(int amount) {
         if(currentMilkAmount >= amount) {
             currentMilkAmount -= amount;
-            CheesemakingMod.LOGGER.debug(currentMilkAmount);
+            //CheesemakingMod.LOGGER.debug(currentMilkAmount);
             markDirty();
             world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), 2);
             return true;

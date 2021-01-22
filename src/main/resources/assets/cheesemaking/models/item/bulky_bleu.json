@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "cheesemaking:item/saturating_stilton"
+    "layer0": "cheesemaking:item/bulky_bleu"
   }
 }

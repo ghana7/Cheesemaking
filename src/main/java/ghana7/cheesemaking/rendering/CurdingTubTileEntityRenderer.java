@@ -34,15 +34,6 @@ public class CurdingTubTileEntityRenderer extends TileEntityRenderer<CurdingTubT
         super(rendererDispatcherIn);
     }
 
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v) {
-        renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, 1.0f)
-                .tex(u, v)
-                .lightmap(0, 240)
-                .normal(1, 0, 0)
-                .endVertex();
-    }
-
     @Override
     public void render(CurdingTubTileEntity tileEntityIn, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, int combinedOverlayIn) {
 

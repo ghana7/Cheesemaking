@@ -1,8 +1,7 @@
 package ghana7.cheesemaking.tileentity;
 
 import ghana7.cheesemaking.CheesemakingMod;
-import ghana7.cheesemaking.item.cheese.Curd;
-import ghana7.cheesemaking.item.Rennet;
+import ghana7.cheesemaking.item.Cheese;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -10,14 +9,16 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 
-public class CurdingTubTileEntity extends TileEntity implements ITickableTileEntity {
+public class CheeseRackTileEntity extends TileEntity implements ITickableTileEntity {
     public ItemStackHandler itemHandler = createHandler();
     private ItemStackHandler createHandler() {
-        return new ItemStackHandler(2) {
+        return new ItemStackHandler(8) {
             @Override
             protected void onContentsChanged(int slot) {
                 markDirty();
@@ -25,18 +26,12 @@ public class CurdingTubTileEntity extends TileEntity implements ITickableTileEnt
 
             @Override
             public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-                if(slot == 0) {
-                    return stack.getItem() instanceof Rennet;
-                }
-                if(slot == 1) {
-                    return stack.getItem() instanceof Curd;
-                }
-                return true;
+                return stack.getItem() instanceof Cheese;
             }
 
             @Override
             protected int getStackLimit(int slot, @Nonnull ItemStack stack) {
-                return 4;
+                return 1;
             }
 
             @Nonnull
@@ -55,13 +50,11 @@ public class CurdingTubTileEntity extends TileEntity implements ITickableTileEnt
         };
     }
 
-    private int timerMax = 60; //3 seconds
+    private int timerMax = 1200; //60 seconds
     private int timer = timerMax;
-    private int milkCapacity = 4000;
-    private int currentMilkAmount = 0;
 
-    public CurdingTubTileEntity() {
-        super(CheesemakingMod.CURDING_TUB_TE.get());
+    public CheeseRackTileEntity() {
+        super(CheesemakingMod.CHEESE_RACK_TE.get());
         timer = timerMax;
     }
 
@@ -72,24 +65,51 @@ public class CurdingTubTileEntity extends TileEntity implements ITickableTileEnt
         }
 
         if(timer > 0) {
-            if(currentMilkAmount >= 1000 && !itemHandler.getStackInSlot(0).isEmpty() && itemHandler.getStackInSlot(1).getCount() < 4) {
+            if(true) {
                 timer--;
             }
         }
 
         if(timer <= 0) {
             timer = timerMax;
-            removeMilk(1000);
-            itemHandler.extractItem(0, 1, false);
-            itemHandler.insertItem(1, new ItemStack(CheesemakingMod.CURD.get(), 1), false);
+            CheesemakingMod.LOGGER.debug(getEnvironmentType());
+            Cheese.EnvironmentType envType = getEnvironmentType();
+            for(int i = 0; i < 8; i++) {
+                if(itemHandler.getStackInSlot(i).getItem() instanceof Cheese) {
+                    Cheese cheeseItem = (Cheese)(itemHandler.getStackInSlot(i).getItem());
+                    ItemStack newCheese = new ItemStack(cheeseItem.getAged(envType), 1);
+                    itemHandler.extractItem(i, 1, false);
+                    itemHandler.insertItem(i, newCheese, false);
+                }
+            }
         }
+    }
+
+    private Cheese.EnvironmentType getEnvironmentType() {
+        if(world.getDimensionKey().equals(World.THE_NETHER)) {
+            return Cheese.EnvironmentType.NETHER;
+        }
+        if(world.canBlockSeeSky(pos)) {
+            if(pos.getY() > 120) {
+                return Cheese.EnvironmentType.SKY;
+            } else {
+                return Cheese.EnvironmentType.LAND;
+            }
+        } else {
+            if(pos.getY() < 60) {
+                return Cheese.EnvironmentType.CAVE;
+            } else {
+                return Cheese.EnvironmentType.BUILDING;
+            }
+        }
+
+
     }
 
     @Override
     public void read(BlockState state, CompoundNBT tag) {
         itemHandler.deserializeNBT(tag.getCompound("inv"));
         timer = tag.getInt("timer");
-        currentMilkAmount = tag.getInt("milkAmount");
         super.read(state, tag);
     }
 
@@ -97,7 +117,6 @@ public class CurdingTubTileEntity extends TileEntity implements ITickableTileEnt
     public CompoundNBT write(CompoundNBT tag) {
         tag.put("inv", itemHandler.serializeNBT());
         tag.putInt("timer", timer);
-        tag.putInt("milkAmount", currentMilkAmount);
         return super.write(tag);
     }
     @Override
@@ -125,32 +144,6 @@ public class CurdingTubTileEntity extends TileEntity implements ITickableTileEnt
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet)
     {
         this.read(getBlockState(), packet.getNbtCompound());
-    }
-
-    public boolean addMilk(int amount) {
-        if(currentMilkAmount + amount <= milkCapacity) {
-            currentMilkAmount += amount;
-            CheesemakingMod.LOGGER.debug(currentMilkAmount);
-            markDirty();
-            world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), 2);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean removeMilk(int amount) {
-        if(currentMilkAmount >= amount) {
-            currentMilkAmount -= amount;
-            CheesemakingMod.LOGGER.debug(currentMilkAmount);
-            markDirty();
-            world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), 2);
-            return true;
-        }
-        return false;
-    }
-
-    public int getMilk() {
-        return currentMilkAmount;
     }
 
 }

@@ -1,7 +1,7 @@
 package ghana7.cheesemaking.block;
 
 import ghana7.cheesemaking.CheesemakingMod;
-import ghana7.cheesemaking.item.Curd;
+import ghana7.cheesemaking.item.cheese.Curd;
 import ghana7.cheesemaking.item.Rennet;
 import ghana7.cheesemaking.tileentity.CurdingTubTileEntity;
 import net.minecraft.block.Block;

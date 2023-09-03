@@ -19,7 +19,7 @@ public class Curd extends Cheese {
             case BUILDING:
                 return CheesemakingMod.GENERIC_GRUYERE.get();
             case LAND:
-                return CheesemakingMod.GENERIC_GRUYERE.get();
+                return CheesemakingMod.BORING_BRIE.get();
             case NETHER:
                 return CheesemakingMod.SNACK_JACK.get();
         }
